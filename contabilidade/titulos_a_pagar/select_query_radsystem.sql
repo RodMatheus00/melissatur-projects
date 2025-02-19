@@ -1,8 +1,12 @@
 SELECT DISTINCT
+	T.OIDTitulo,
 	T.Estabelecimento,
 	CONCAT(T.Empresa, '/', T.Estabelecimento) AS 'Emp/Est',
 	Esp.Descricao AS EspecieTitulo,
-	Pessoa.Nome AS Pessoa,
+	CASE
+		WHEN Pessoa.Nome IS NULL THEN T.DescricaoPessoa
+		ELSE Pessoa.Nome
+	END AS Pessoa,
 	T.DtEmissao,
 	T.DtVencimento,
 	T.NumDocumento AS Documento,
@@ -21,11 +25,11 @@ INNER JOIN
 	FormaPagamento Form ON Form.OIDFormaPagamento = T.OIDFormaPagamento
 INNER JOIN
 	IndicativoSituacao Indi ON Indi.OIDIndicativoSituacao = T.OIDIndicativoSituacao
-INNER JOIN
+LEFT JOIN
 	Pessoa ON Pessoa.OIDPessoa = T.OIDPessoa
 WHERE 
     T.DtVencimento >= '2025-01-01'
     AND T.Estabelecimento IN ('5', '26', '2', '29', '18', '14', '12', '11', '28', '23', '27', '3', '17')
-    AND Indi.Descricao IN ('Aguardando Liberação', 'Liberado', 'Liquidado')
-	AND Esp.Descricao IN ('Titulo a Pagar', 'Titulo a Pagar')
+    AND Indi.Descricao IN ('Aguardando Liberação', 'Liberado', 'Liquidado', 'Aguardando Pagamento ao Fornecedor', 'Substituído')
+	AND Esp.Descricao IN ('Titulo a Pagar', 'Adiantamento a Fornecedores', 'Títulos a Receber', 'Adiantamento de Clientes')
 
