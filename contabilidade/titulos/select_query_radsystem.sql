@@ -30,6 +30,5 @@ LEFT JOIN
 WHERE 
     T.DtVencimento >= '2025-01-01'
     AND T.Estabelecimento IN ('5', '26', '2', '29', '18', '14', '12', '11', '28', '23', '27', '3', '17')
-    AND Indi.Descricao IN ('Aguardando Liberação', 'Liberado', 'Liquidado', 'Aguardando Pagamento ao Fornecedor', 'Substituído')
-	AND Esp.Descricao IN ('Titulo a Pagar', 'Adiantamento a Fornecedores', 'Títulos a Receber', 'Adiantamento de Clientes')
-
+    AND Indi.Descricao IN ('Aguardando Liberação', 'Liberado', 'Aguardando Pagamento ao Fornecedor')
+	AND Esp.Descricao IN ('Titulo a Pagar', 'Adiantamento a Fornecedores')
