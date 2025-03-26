@@ -5,8 +5,8 @@ SELECT
     CP.DT_VENCIMENTO AS Data_Vencimento,
     CP.NR_DOCUMENTO AS Documento,
     CP.NR_PARCELA AS Parcela,
-    CP.VL_DOCUMENTO AS Valor,
     CP.VL_PAGO AS Pago,
+    CP.VL_DOCUMENTO - CP.VL_DESCONTO AS Valor,
     CASE
         WHEN CP.CS_SITUACAO = 'R' THEN 'Liberado'
         WHEN CP.CS_SITUACAO = 'P' THEN 'Aguardando Liberação'
