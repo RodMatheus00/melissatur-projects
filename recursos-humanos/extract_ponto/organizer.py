@@ -3,9 +3,8 @@ def parse_txt_line(line):
     tipo_registro = line[9]
     data_raw = line[10:18]
     hora_raw = line[18:22]
-    pis = line[23:]  # pulando o caractere na posição 22
+    pis = line[23:] 
 
-    # Formatando data e hora
     data_formatada = f"{data_raw[:2]}/{data_raw[2:4]}/{data_raw[4:]}"
     hora_formatada = f"{hora_raw[:2]}:{hora_raw[2:]}"
 
@@ -26,14 +25,12 @@ def ler_arquivo_txt(caminho):
                 registros.append(parse_txt_line(linha))
     return registros
 
-# Exemplo de uso
 import pandas as pd
 
-caminho_arquivo = 'Ponto.txt'  # substitua pelo seu caminho real
+caminho_arquivo = 'Ponto.txt'
 dados = ler_arquivo_txt(caminho_arquivo)
 
 df = pd.DataFrame(dados)
 print(df)
 
-# Exportar se quiser
 df.to_excel('registros_separados.xlsx', index=False)
