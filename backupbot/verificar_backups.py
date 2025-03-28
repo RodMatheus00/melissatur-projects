@@ -7,21 +7,17 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
-# Carrega variáveis do arquivo .env
 load_dotenv()
 
-# CONFIGURAÇÃO DE EMAIL (via .env)
 SENDER_EMAIL = os.getenv('SENDER_EMAIL')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 RECIPIENT_EMAILS = os.getenv('RECIPIENT_EMAILS').split(',')
 SMTP_SERVER = os.getenv('SMTP_SERVER')
 SMTP_PORT = int(os.getenv('SMTP_PORT'))
 
-# Caminho para a pasta de backups
 backup_path = r'\\AS6104\Public\BackupRS\RadSystem'
 date_pattern = re.compile(r'(\d{4})_(\d{2})_(\d{2})')
 
-# Nomes dos meses em português
 month_names = {
     1: "Janeiro", 2: "Fevereiro", 3: "Março", 4: "Abril",
     5: "Maio", 6: "Junho", 7: "Julho", 8: "Agosto",
@@ -36,7 +32,6 @@ backups = []
 kept_report = []
 deleted_report = []
 
-# Coleta os backups na pasta
 for item_name in os.listdir(backup_path):
     match = date_pattern.search(item_name)
     if match:
@@ -48,7 +43,6 @@ for item_name in os.listdir(backup_path):
         if month_key not in end_of_month_backups or date > end_of_month_backups[month_key][0]:
             end_of_month_backups[month_key] = (date, item_name)
 
-# Verifica se há backup de hoje
 has_today_backup = any(date == today for (date, _) in backups)
 tem_backup_recente = False
 files_to_keep = set()
@@ -71,7 +65,6 @@ else:
                 kept_report.append(f"Mantido: {date} (ontem - substituto)")
                 kept_dates.add(date)
 
-# Mantém os últimos de cada mês
 for date, name in end_of_month_backups.values():
     files_to_keep.add(name)
     if date not in kept_dates:
