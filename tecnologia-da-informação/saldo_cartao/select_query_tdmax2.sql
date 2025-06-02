@@ -1,44 +1,51 @@
+WITH UltimoAcesso AS (
+    SELECT 
+        NumSerie,
+        DataAcesso,
+		Transacao,
+        QtdUsada,
+        Saldo,
+        ValorUsado,
+        ROW_NUMBER() OVER (PARTITION BY NumSerie ORDER BY DataAcesso DESC) AS RN
+    FROM vwInfoAcessoCartao
+)
+
 SELECT
-    T.LoteID AS 'Lote ID',
-    FORMAT(T.DataCriacao, 'dd/MM/yyyy') AS [Data da Criação],
-    T.LoteStr,
-    T.Transacao,
-    T.NumSerie,
-    Cadastros.Nome AS 'Usuário',
-    CS.DocumentoFederal AS 'Documento',
-    CS.UltimaTransacao AS 'Ultimo uso',
-    CA.Saldo AS 'Saldo Atual',
-    CA.ValorUsado AS 'Passagem',
-    FORMAT(CS.UltimaTransacao, 'dd/MM/yyyy') AS 'Ultima Utilização',
-    CT.Descricao AS 'Produto',
-    CASE WHEN CT.Descricao = 'Comum' THEN 1 ELSE 0 END AS 'Pagante',
-    CASE WHEN CT.Descricao = 'Gratuito' THEN 1 ELSE 0 END AS 'Gratuitos',
-    CASE WHEN CT.Descricao = 'Estudante' THEN 1 ELSE 0 END AS 'Estudante'
-FROM vw_dbaCartoesSaldos CS
-INNER JOIN Cadastros ON Cadastros.DocFederal = CS.DocumentoFederal
-INNER JOIN CadastrosTipos CT ON CT.CadastroTipoID = Cadastros.CadastroTipoID
-INNER JOIN (
-    SELECT
-        CT.Data,
-        CT.NumSerie,
-        CT.Transacao,
-        CT.LoteID,
-        CT.CadastroID,
-        CS.Saldo,
-        L.DataCriacao,
-        L.LoteStr
-    FROM CartoesTransacoes CT
-    INNER JOIN CartoesSaldos CS ON CS.NumSerie = CT.NumSerie AND CS.Transacao = CT.Transacao
-    INNER JOIN (
-        SELECT 
-            Lotes.DataCriacao,
-            Lotes.LoteID,
-            Lotes.LoteStr
-        FROM Lotes
-    ) L ON L.LoteID = CT.LoteID
-) T ON T.Data = CS.UltimaTransacao AND T.CadastroID = Cadastros.CadastroID
-INNER JOIN CartoesAcessos CA ON CA.NumSerie = T.NumSerie AND CA.Transacao = T.Transacao
+	FORMAT(L.DataCriacao, 'dd/MM/yyyy') AS [Data da Criação],
+	L.LoteStr,
+	UA.Transacao,
+	UA.NumSerie,
+	C.CadastroID AS 'Usuário',
+	C.DocFederal AS 'Documento',
+	UA.DataAcesso AS 'Ultimo Uso',
+	CASE 
+		WHEN DATEDIFF(MONTH, L.DataCriacao, GETDATE()) <= 12 THEN UA.Saldo
+		ELSE 0
+	END AS 'Saldo Atual',
+	CONVERT(DATE, UA.DataAcesso) AS 'Ultima Utilização',
+	P.Descricao AS 'Produtos',
+	CASE
+    WHEN P.Descricao IN ('Vale Transporte', 'Vale Transporte Rural') THEN 'VALE TRANSPORTE'
+		WHEN P.Descricao IN ('Escolar', 'Escolar-Ferraria') THEN 'ESCOLAR'
+		WHEN P.Descricao = 'Comum' THEN 'COMUM'
+		ELSE 'OUTROS'
+	END AS Produtos,
+    CASE WHEN P.Descricao = 'Comum' THEN 1 ELSE 0 END AS 'Pagante',
+	CASE WHEN P.Descricao IN ('Vale Transporte', 'Vale Transporte Rural') THEN 1 ELSE 0 END AS 'Quantidade VT',
+    CASE WHEN P.Descricao IN ('Escolar', 'Escolar-Ferraria') THEN 1 ELSE 0 END AS 'Quantidade Escolar'
+FROM UltimoAcesso UA
+INNER JOIN
+	Cartoes_Donos CD ON CD.NumSerie = UA.NumSerie
+INNER JOIN
+	Cadastros C ON C.CadastroID = CD.CadastroID
+INNER JOIN
+	CartoesTransacoes CT ON CT.NumSerie = UA.NumSerie AND CT.Transacao = UA.Transacao
+INNER JOIN
+	Produtos P ON P.ProdutoID = CT.ProdutoID
+JOIN
+	Lotes L ON L.LoteID = CT.LoteID
 WHERE
-    Cadastros.PerfilCompraID IS NOT NULL
-    AND CT.CadastroTipoID IN ('1', '3', '5')
-    AND T.DataCriacao >= '2024-09-30'
+	UA.RN = 1
+	AND QtdUsada IS NOT NULL
+	AND C.PerfilCompraID IS NOT NULL
+	AND P.Descricao IN ('COMUM', 'Escolar', 'Escolar-Ferraria', 'Vale Transporte', 'Vale Transporte Rural')
