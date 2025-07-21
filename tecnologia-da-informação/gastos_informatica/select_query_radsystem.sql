@@ -69,8 +69,7 @@ SELECT
         WHEN ItemGrupo = 'Serviços Diversos' THEN 'Serviços e Suporte'
         WHEN ItemGrupo IN ('Expediente', 'Bens de Valor Irrelevante') THEN 'Administração Geral'
         WHEN ItemGrupo = 'Bilhetagem' THEN 'Bilhetagem'
-        WHEN ItemGrupo = 'Informática' THEN 'Informática'
-        ELSE 'Outros'
+        ELSE 'Informática'
     END AS [Item Grupo],
 
     Quantidade,
