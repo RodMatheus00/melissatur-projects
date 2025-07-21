@@ -16,10 +16,11 @@ WITH A AS (
         LEFT JOIN Bem B ON B.OIDBem = T.OIDBem
 )
 
-SELECT TOP 100 
+SELECT 
+	'RS1' AS Servidor,
     Estabelecimento.Codigo AS [Codigo Empresa],
     Estabelecimento.Nome AS [Estabelecimento],
-    A.Nome,
+    A.Nome as 'Bancos',
     A.NumDocumento AS [Numero Documento],
     SUM(A.Quantidade) AS [Quantidade de Parcelas],
     SUM(CASE WHEN A.ValorSaldo = 0 THEN A.Quantidade ELSE 0 END) AS [Quantidade de Parcelas Pagas],
@@ -64,8 +65,6 @@ FROM
 
 WHERE
 	A.DtVencimento >= '2025-01-01'
-	AND Estabelecimento.Codigo = '28'
-	AND A.NumDocumento = '20052025'
 
 GROUP BY
     Estabelecimento.Codigo,
