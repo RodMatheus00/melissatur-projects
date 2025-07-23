@@ -50,16 +50,21 @@ WITH ConsultaFinal AS (
         AND (
             (GID.Descricao IN ('Informatica', 'Bilhetagem') AND MD.Codigo IN ('021', '045'))
             OR Forn.Codigo IN (
-                '19861', '29701', '52329', '46523', '48496',
-                '27596', '41157', '32972', '25755', '36455',
-                '4665', '39071'
-            )
+				'19861', '29701', '52329', '46523', '48496',
+				'27596', '41157', '32972', '25755', '36455',
+				'4665',  '39071', '25054', '27766', '41246',
+				'43915', '14281', '2871',  '29611', '40649',
+				'49093', '10545', '4709',  '30775', '21725',
+				'20631', '12335', '52604', '50002', '38131',
+				'27774', '2989',  '40916', '26069', '14931',
+				'28631', '37871')
         )
 )
 
 SELECT 
     Data,
     Empresa,
+    Codigo,
     Fornecedor,
     Documento,
     Item,
@@ -110,7 +115,8 @@ LEFT JOIN (
 ) NF ON NF.OIDDocumento = ConsultaFinal.OIDDocumento
     AND NF.ContagemGrupo = ConsultaFinal.ContagemPorDocumento
 
-WHERE ItemGrupo NOT IN (
+WHERE 
+	ItemGrupo NOT IN (
     'Ambiente',
     'Material de Construção',
     'Copa / Cozinha',
@@ -118,5 +124,5 @@ WHERE ItemGrupo NOT IN (
     'Papelaria',
     'Borracharia',
     'Mercedes Benz',
-    'Fretes e Carretos'
-);
+    'Fretes e Carretos')
+;
