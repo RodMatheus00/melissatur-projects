@@ -49,7 +49,12 @@ SELECT
 
     SUM(A.Valor) - SUM(A.ValorSaldo) AS [Valor Pago],
     SUM(A.ValorSaldo) AS [Valor Devedor],
-    SUM(A.Valor) AS [Valor Total]
+    SUM(A.Valor) AS [Valor Total],
+
+	CASE 
+		WHEN SUM(A.ValorSaldo) = 0 THEN 'Quitado'
+		ELSE 'Pendente'
+	END AS Situacao_Conta
 
 FROM
     A
@@ -62,10 +67,6 @@ FROM
             INNER JOIN Pessoa P ON P.OIDPessoa = E.OIDPessoa
     ) Estabelecimento
         ON Estabelecimento.Codigo = A.Estabelecimento
-
-WHERE
-	A.DtVencimento >= '2025-01-01'
-
 GROUP BY
     Estabelecimento.Codigo,
     Estabelecimento.Nome,

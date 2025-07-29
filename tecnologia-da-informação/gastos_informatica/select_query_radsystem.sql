@@ -6,6 +6,7 @@ WITH ConsultaFinal AS (
         Fornecedor.Nome AS Fornecedor,
         CONVERT(DATE, D.DtMovimento) AS Data,
         D.Numero AS Documento,
+		Item.Codigo AS Codigo_Item,
         CONCAT(Item.Codigo, ' - ', NFI.Descricao) AS Item,
         GID.Descricao AS ItemGrupo,
         NFI.Quantidade AS Quantidade,
@@ -57,24 +58,24 @@ WITH ConsultaFinal AS (
 				'49093', '10545', '4709',  '30775', '20631', 
 				'12335', '52604', '50002', '38131',	'27774',
 				'2989',  '40916', '26069', '14931',	'28631',
-				'37871', '27871', '32743', '52175', '30961')
+				'37871', '27871', '32743', '52175', '30961',
+				'9458', '35084')
         )
-)
+),
 
+B AS (
 SELECT 
     Data,
     Empresa,
 	Codigo,
     Fornecedor,
     Documento,
+	Codigo_Item,
     Item,
     CASE
-        WHEN ItemGrupo IN ('Elétrica', 'Lataria', 'Máquinas e Equipamentos', 'Móveis e Utensílios') THEN 'Infraestrutura e Equipamentos'
-        WHEN ItemGrupo IN ('Mecânica', 'Material Consumo Manutenção') THEN 'Tecnologia e Manutenção'
-        WHEN ItemGrupo = 'Serviços Diversos' THEN 'Serviços e Suporte'
-        WHEN ItemGrupo IN ('Expediente', 'Bens de Valor Irrelevante') THEN 'Administração Geral'
-        WHEN ItemGrupo = 'Bilhetagem' THEN 'Bilhetagem'
-        ELSE 'Informática'
+        WHEN Codigo IN ('34819', '47741', '23264', '33261', '30961') THEN 'Administração Geral'
+        WHEN ItemGrupo IN ('Bilhetagem', 'Serviços Diversos') THEN 'Bilhetagem'
+        ELSE 'Equipamentos Informática'
     END AS [Item Grupo],
 
     Quantidade,
@@ -124,5 +125,16 @@ WHERE
     'Papelaria',
     'Borracharia',
     'Mercedes Benz',
-    'Fretes e Carretos')
-;
+    'Fretes e Carretos'))
+
+SELECT
+	*,
+	CASE 
+		WHEN Codigo_Item = '3931' THEN 'Locação Impressoras'
+		WHEN Codigo_Item = '5233' THEN 'Telefonia e internet'
+		WHEN Codigo = '9458' THEN 'Sistemas ERP'
+		WHEN Codigo IN ('52604', '35084') THEN 'Rastreamento'
+		WHEN Codigo IN ('32743') THEN 'Wifi Ônibus'
+	ELSE [Item Grupo]
+	END AS Item_Grupo_Correto
+FROM B
