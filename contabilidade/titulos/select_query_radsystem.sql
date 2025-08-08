@@ -30,7 +30,7 @@ INNER JOIN
 INNER JOIN
 	Pessoa P ON P.OIDPessoa = E.OIDPessoa
 WHERE 
-	T.Estabelecimento IN ('5', '26', '2', '29', '18', '14', '12', '11', '28', '23', '27', '3', '17')
+	T.Estabelecimento IN ('5', '26', '2', '29', '18', '14', '12', '11', '28', '23', '27', '3', '17', '31', '32', '33', '34', '35')
     AND Indi.Descricao IN ('Aguardando Liberação', 'Liberado', 'Aguardando Pagamento ao Fornecedor', 'Liquidado')
 	AND Esp.Descricao IN ('Titulo a Pagar')
 	AND DtVencimento IS NOT NULL
