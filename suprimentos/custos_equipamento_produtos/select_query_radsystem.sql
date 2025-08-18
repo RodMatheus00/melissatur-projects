@@ -139,7 +139,7 @@ JOIN (
 	INNER JOIN
 		vEquipamentoSomenteIdentificacaoEstabelecimento E ON E.OIDBem = EU.OIDBem
 WHERE
-	E.Estabelecimento IN ('17', '2', '23', '26', '27', '28', '3', '5', '31', '32', '33'))
+	E.Estabelecimento IN ('17', '2', '23', '26', '27', '28', '3', '5', '31', '32', '33', '34', '35'))
 
 SELECT DISTINCT
 	CF.Estabelecimento,
