@@ -1,5 +1,6 @@
 WITH ConsultaFinal AS (
     SELECT
+		NFI.OIDNaturezaOperacao,
         D.OIDDocumento,
         Forn.Codigo,
         CONCAT(D.Estabelecimento, ' - ', Estabelecimento.Nome) AS Empresa,
@@ -10,26 +11,7 @@ WITH ConsultaFinal AS (
         CONCAT(Item.Codigo, ' - ', NFI.Descricao) AS Item,
         GID.Descricao AS ItemGrupo,
         NFI.Quantidade AS Quantidade,
-        NFI.ValorTotal AS Valor,
-        
-        -- Contagem por grupo
-        CASE 
-            WHEN ROW_NUMBER() OVER (PARTITION BY NFI.OIDDocumento, GID.Descricao ORDER BY NFI.OIDDocumento) = 1 THEN 1
-            ELSE 0
-        END AS ContagemPorGrupo,
-        
-        -- Contagem por tipo de documento
-        CASE
-            WHEN ROW_NUMBER() OVER (PARTITION BY NFI.OIDDocumento, MD.Codigo ORDER BY NFI.OIDDocumento) = 1 THEN 1
-            ELSE 0
-        END AS ContagemPorTipo,
-        
-        -- Contagem por documento (geral)
-        CASE 
-            WHEN ROW_NUMBER() OVER (PARTITION BY NFI.OIDDocumento ORDER BY NFI.OIDDocumento) = 1 THEN 1
-            ELSE 0
-        END AS ContagemPorDocumento
-
+        NFI.ValorTotal AS Valor
     FROM NotaFiscalItem NFI
     INNER JOIN Documento D ON D.OIDDocumento = NFI.OIDDocumento
     INNER JOIN NotaFiscal NF ON NF.OIDDocumento = NFI.OIDDocumento
@@ -66,7 +48,7 @@ WITH ConsultaFinal AS (
 B AS (
 SELECT 
     Data,
-    Empresa,
+    ConsultaFinal.Empresa,
 	Codigo,
     Fornecedor,
     Documento,
@@ -77,45 +59,11 @@ SELECT
         WHEN ItemGrupo IN ('Bilhetagem', 'Serviços Diversos') THEN 'Bilhetagem'
         ELSE 'Equipamentos Informática'
     END AS [Item Grupo],
-
     Quantidade,
-
-    -- Cálculo do valor líquido com retenções e acréscimos
-    Valor
-        - COALESCE(NF.ValorCOFINSRetencao, 0)
-        - COALESCE(NF.ValorIRRF, 0)
-        - COALESCE(NF.ValorCSLLRetencao, 0)
-        - COALESCE(NF.ValorISSRetencao, 0)
-        - COALESCE(NF.ValorPISRetencao, 0)
-        - COALESCE(NF.ValorDesconto, 0)
-        - COALESCE(NF.ValorINSS, 0)
-        + COALESCE(NF.ValorFrete, 0)
-        + COALESCE(NF.ValorOutrasDespesas, 0)
-        + COALESCE(NF.ValorICMSST, 0)
-        + COALESCE(NF.ValorIPI, 0) AS ValorTotal
-
+    Valor AS 'ValorTotal'
 FROM ConsultaFinal
-
-LEFT JOIN (
-    SELECT 
-        OIDDocumento,
-        OIDPessoa,
-        ValorCOFINSRetencao,
-        ValorINSS,
-        ValorICMSST,
-        ValorOutrasDespesas,
-        ValorIRRF,
-        ValorIPI,
-        ValorCSLLRetencao,
-        ValorISSRetencao,
-        ValorPISRetencao,
-        ValorDesconto,
-        ValorFrete,
-        1 AS ContagemGrupo
-    FROM NotaFiscal
-) NF ON NF.OIDDocumento = ConsultaFinal.OIDDocumento
-    AND NF.ContagemGrupo = ConsultaFinal.ContagemPorDocumento
-
+INNER JOIN
+	NaturezaOperacao ON NaturezaOperacao.OIDNaturezaOperacao = ConsultaFinal.OIDNaturezaOperacao
 WHERE 
 	ItemGrupo NOT IN (
     'Ambiente',
@@ -125,7 +73,9 @@ WHERE
     'Papelaria',
     'Borracharia',
     'Mercedes Benz',
-    'Fretes e Carretos')),
+    'Fretes e Carretos')
+	AND NaturezaOperacao.IndGeraTitulo = 'S'
+    AND Item NOT LIKE '7002%'),
 
 C AS (
 SELECT
